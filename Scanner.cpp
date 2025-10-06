@@ -33,7 +33,7 @@ static bool is_apostrophe(int ch) {
 Scanner::Scanner(std::filesystem::path inputPath) {
     // You complete this...
     const std::string base = inputPath.stem().string();
-    inputPath_ = std::filesystem::path(base + ".txt");
+    inputPath_ = inputPath.parent_path() / (base + ".txt");
 
 }
 error_type Scanner::tokenize(std::vector<std::string>& words) {
@@ -62,16 +62,53 @@ error_type Scanner::tokenize(std::vector<std::string>& words) {
     return NO_ERROR;
 }
 
+error_type Scanner::tokenize(std::vector<std::string> &words, const std::filesystem::path &outputFile) {
+    error_type err = tokenize(words);
+    if (err != NO_ERROR) {
+        return err;
+    }
+
+    std::ofstream out(outputFile);
+    if (!out.is_open()) {
+        return UNABLE_TO_OPEN_FILE_FOR_WRITING;
+    }
+    if (words.empty()) {
+        out << '\n';
+        if (!out) {
+            return FAILED_TO_WRITE_FILE;
+        }
+    } else {
+        std::size_t i = 0;
+        const std::size_t n = words.size();
+        while (i < n) {
+            out << words[i] << '\n';
+            if (!out) return FAILED_TO_WRITE_FILE;
+            ++i;
+        }
+    }
+    out.flush();
+    if (!out.good()) {
+        return FAILED_TO_WRITE_FILE;
+    }
+
+    return NO_ERROR;
+
+}
+
 std::string Scanner::readWord(std::istream &in) {
     std::string tok;
-    for (;;) {
-        int c = in.get();
+    int c = in.get();
+    while (true) {
+
         if (c == EOF) {
             return tok;
         }
 
-        if (!is_ascii(c)) {                // non-ASCII => separator
-            if (!tok.empty()) return tok;
+        if (!is_ascii(c)) {
+            if (!tok.empty()) {
+                return tok;
+            }
+            c = in.get();
             continue;
         }
 
@@ -79,23 +116,31 @@ std::string Scanner::readWord(std::istream &in) {
 
         if (is_ascii_letter(ch)) {         // letters extend token
             tok.push_back(to_ascii_lower(ch));
+            c = in.get();
             continue;
         }
 
         if (is_apostrophe(ch)) {
             if (tok.empty()) {
+                // leading apostrophe: skip
+                c = in.get();
                 continue;
-            }     // drop leading apostrophes
+            }
             int nxt = in.peek();
             if (nxt != EOF && is_ascii(nxt) && is_ascii_letter(nxt)) {
-                tok.push_back('\'');       // keep only if between letters
-                in.get();
+                tok.push_back('\'');
+                in.get(); // consume peeked letter
                 tok.push_back(to_ascii_lower(static_cast<char>(nxt)));
+                c = in.get();
                 continue;
             } else {
-                return tok;                // trailing/apostrophe not followed by letter
+                return tok;
             }
         }
-        if (!tok.empty()) return tok;
+
+        if (!tok.empty()) {
+            return tok;
+        }
+        c = in.get();
     }
 }
