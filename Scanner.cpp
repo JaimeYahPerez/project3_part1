@@ -10,29 +10,29 @@
 
 #include "utils.hpp"
 
-static bool is_ascii(int ch) {
-    auto u = static_cast<unsigned char>(ch);
-    return u <= 0x7F;
+bool is_ascii(int ch) {
+    auto u = static_cast<char>(ch);
+    return u <= 127;
 }
-static bool is_ascii_letter(int ch) {
+bool is_ascii_letter(int ch) {
     if (!is_ascii(ch)) {
         return false;
     }
-    auto u = static_cast<unsigned char>(ch);
+    auto u = static_cast<char>(ch);
     return (u >= 'A' && u <= 'Z') || (u >= 'a' && u <= 'z');
 }
 
-static char to_ascii_lower(char ch) {
-    return (ch >= 'A' && ch <= 'Z') ? static_cast<char>(ch - 'A' + 'a') : ch;
+char to_ascii_lower(int ch) {
+    return (ch >= 'A' && ch <= 'Z') ? (ch - 'A' + 'a') : ch;
 }
-static bool is_apostrophe(int ch) {
+bool is_apostrophe(int ch) {
     return ch == '\'';
 }
 
 
 Scanner::Scanner(std::filesystem::path inputPath) {
     // You complete this...
-    const std::string base = inputPath.stem().string();
+    std::string base = inputPath.stem().string();
     inputPath_ = inputPath.parent_path() / (base + ".txt");
 
 }
@@ -47,7 +47,7 @@ error_type Scanner::tokenize(std::vector<std::string>& words) {
         return FILE_NOT_FOUND;
     }
 
-    std::ifstream in(inputPath_, std::ios::binary);
+    std::ifstream in(inputPath_);
     if (!in.is_open()) {
         return UNABLE_TO_OPEN_FILE;
     }
@@ -78,12 +78,14 @@ error_type Scanner::tokenize(std::vector<std::string> &words, const std::filesys
             return FAILED_TO_WRITE_FILE;
         }
     } else {
-        std::size_t i = 0;
-        const std::size_t n = words.size();
+        size_t i = 0;
+        size_t n = words.size();
         while (i < n) {
             out << words[i] << '\n';
-            if (!out) return FAILED_TO_WRITE_FILE;
-            ++i;
+            if (!out) {
+                return FAILED_TO_WRITE_FILE;
+            }
+            i++;
         }
     }
     out.flush();
@@ -99,7 +101,6 @@ std::string Scanner::readWord(std::istream &in) {
     std::string tok;
     int c = in.get();
     while (true) {
-
         if (c == EOF) {
             return tok;
         }
@@ -112,30 +113,27 @@ std::string Scanner::readWord(std::istream &in) {
             continue;
         }
 
-        char ch = static_cast<char>(c);
-
-        if (is_ascii_letter(ch)) {         // letters extend token
-            tok.push_back(to_ascii_lower(ch));
-            c = in.get();
-            continue;
-        }
-
-        if (is_apostrophe(ch)) {
+        if (is_apostrophe(c)) {
             if (tok.empty()) {
-                // leading apostrophe: skip
                 c = in.get();
                 continue;
             }
             int nxt = in.peek();
             if (nxt != EOF && is_ascii(nxt) && is_ascii_letter(nxt)) {
                 tok.push_back('\'');
-                in.get(); // consume peeked letter
-                tok.push_back(to_ascii_lower(static_cast<char>(nxt)));
+                in.get();
+                tok.push_back(to_ascii_lower(nxt));
                 c = in.get();
                 continue;
             } else {
                 return tok;
             }
+        }
+
+        if (is_ascii_letter(c)) {
+            tok.push_back(to_ascii_lower(c));
+            c = in.get();
+            continue;
         }
 
         if (!tok.empty()) {
