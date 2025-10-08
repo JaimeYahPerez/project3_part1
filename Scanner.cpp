@@ -40,13 +40,18 @@ error_type Scanner::tokenize(std::vector<std::string>& words) {
     words.clear();
 
     const std::filesystem::path parent = inputPath_.parent_path();
-    if (!parent.empty() && !std::filesystem::exists(parent)) {
-        return DIR_NOT_FOUND;
-    }
-    if (!std::filesystem::exists(inputPath_) || !std::filesystem::is_regular_file(inputPath_)) {
-        return FILE_NOT_FOUND;
+
+    auto st = directoryExists(parent.string());
+    if (!parent.empty()) {
+        if (st != NO_ERROR) {
+            return st;
+        }
     }
 
+    st = regularFileExistsAndIsAvailable(inputPath_.string());
+    if ( st != NO_ERROR) {
+        return st;
+    }
     std::ifstream in(inputPath_);
     if (!in.is_open()) {
         return UNABLE_TO_OPEN_FILE;
@@ -63,38 +68,12 @@ error_type Scanner::tokenize(std::vector<std::string>& words) {
 }
 
 error_type Scanner::tokenize(std::vector<std::string> &words, const std::filesystem::path &outputFile) {
-    error_type err = tokenize(words);
-    if (err != NO_ERROR) {
-        return err;
+    auto st = tokenize(words);
+    if (st != NO_ERROR) {
+        return st;
     }
 
-    std::ofstream out(outputFile);
-    if (!out.is_open()) {
-        return UNABLE_TO_OPEN_FILE_FOR_WRITING;
-    }
-    if (words.empty()) {
-        out << '\n';
-        if (!out) {
-            return FAILED_TO_WRITE_FILE;
-        }
-    } else {
-        size_t i = 0;
-        size_t n = words.size();
-        while (i < n) {
-            out << words[i] << '\n';
-            if (!out) {
-                return FAILED_TO_WRITE_FILE;
-            }
-            i++;
-        }
-    }
-    out.flush();
-    if (!out.good()) {
-        return FAILED_TO_WRITE_FILE;
-    }
-
-    return NO_ERROR;
-
+    return writeVectorToFile(outputFile.string(), words);
 }
 
 std::string Scanner::readWord(std::istream &in) {
