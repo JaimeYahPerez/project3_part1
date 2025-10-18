@@ -24,7 +24,7 @@ When I originally wrote both tokenize functions I did as much as I could manuall
 had access to in utils, therefore what is present in both is primarily a result of what resources were present
 in the given starter files, and how I best interpreted the project specs
 
-*Part 2*
+# Part 2
 The header files utilize the provided sketches from the main project page, and
 the tree node header file is pulled from a previous lab with edits made to it for usability in this project
 
@@ -38,7 +38,7 @@ any issues may lie. Which would lead to the current implementation of main.cpp
 main() has now been readjusted to correctly send the input file to scanner. And the given implementation used for 
 project 1 was reworked to fit with the test scripts given.
 
-# Bin Search Tree
+*Bin Search Tree*
 The implementations done for this heavily based off what was described in the main project page
 
 int cmp() was written to help with needed comparison tests based off of previous experience working with trees, and it
@@ -49,7 +49,7 @@ The constructor and public functions were written using prior experience and lab
 insertHelper(), inorderhelper(), sizeHelper(), heightHelper, and findNode() were designed based off our work with
 recursion and have logic similar to those labs
 
-# Priority Queue
+*Priority Queue*
 This implementation was also based heavily on what we have done before, specifically more so with our recent lab and 
 lectures. The project page also helped guide the implementation of the sorting needed
 
@@ -116,13 +116,13 @@ character is called for into c, and the loop is continued
 As an additional safety check if no previous checks have passed, but tok is not empty, then it is returned as is
 Otherwise, the next character is called for into c
  
-*part 2*
+# part 2
 The needed implementations for BinSearchTree and priorityqueue were provided by main project page, and some of the 
 structures for their implementation was based off what we were given.
 
 TreeNodes was pulled from a previous lab, and edited to accommodate the needs for this project part
 
-# BinSearchTree
+*BinSearchTree*
 cmp() was made as a helper function for later comparisons, which compares the strings a and b directly, and returns a 
 number -1,0, 1 based on which is bigger. -1 string a is less than b. 0 both are equivalent, 1 a is bigger than b
 
@@ -158,7 +158,7 @@ sizeHelper() uses recursive logic to travel left then right, and adds 1 to the r
 heightHelper() uses recursive logic to traverse left then right, and compares the count made by both recursive traversal
 to see which branch is larger, and returns that branches count
 
-# priority queue
+ *priority queue*
 higherPriority() works off the logic given in the main project page
 isSorted() runs a for loop which checks if the higherpriority is maintained throughout the vector
 and returns false if it isnt, and true if the for loop is completed with no issue
@@ -180,7 +180,7 @@ to maintain sorted status
 
 print() does a standard print to console
 
-# main
+*main*
 
 the start of main has been edited to ensure the correct parent path to input_output/ is made to ensure the .txt file
 is found
@@ -201,7 +201,7 @@ Testing on blue has proved successful with the provided scripts, apart from the 
 with diff, but does display an error afterwards when looking for the output .tokens file, if ran using the given bash
 files. 
 
-*part 2*
+# part 2
 Significant testing was done to ensure that the current implementation works well with the given bash scripts.
 Currently the last test ran on blue gave back 22 matches with the current implementation, and no errors
 
