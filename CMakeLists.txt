@@ -8,4 +8,7 @@ add_executable(p3_part1 main.cpp
         Scanner.hpp
         utils.cpp
         utils.hpp
-        )
+        PriorityQueue.h
+        BinSearchTree.cpp
+        PriorityQueue.cpp
+)

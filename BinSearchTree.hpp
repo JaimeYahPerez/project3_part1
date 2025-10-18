@@ -1,3 +1,10 @@
+#pragma once
+#include <optional>
+#include <string>
+#include <vector>
+#include <utility>
+#include "TreeNode.hpp"
+
 class BinSearchTree {
 public:
     BinSearchTree() = default;
@@ -21,6 +28,7 @@ public:
     [[nodiscard]] unsigned height() const noexcept;   // empty tree = 0
 
 private:
+
     // TreeNode is defined elsewhere in the project
     TreeNode* root_ = nullptr;
 
@@ -28,8 +36,7 @@ private:
     static void destroy(TreeNode* node) noexcept;
     static TreeNode* insertHelper(TreeNode* node, const std::string& word);
     static const TreeNode* findNode(const TreeNode* node, std::string_view word) noexcept;
-    static void inorderHelper(const TreeNode* node,
-        std::vector<std::pair<std::string, int>>& out);
+    static void inorderHelper(const TreeNode* node, std::vector<std::pair<std::string, int>>& out);
     static std::size_t sizeHelper(const TreeNode* node) noexcept;
     static unsigned heightHelper(const TreeNode* node) noexcept;
 };
