@@ -4,7 +4,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
 #ifndef IMPLEMENTATION_UTILS_HPP
 #define IMPLEMENTATION_UTILS_HPP

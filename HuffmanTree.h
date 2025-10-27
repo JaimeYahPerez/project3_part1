@@ -1,3 +1,4 @@
+#pragma once
 #ifndef IMPLEMENTATION_HUFFMANTREE_H
 #define IMPLEMENTATION_HUFFMANTREE_H
 #include "TreeNode.hpp"
