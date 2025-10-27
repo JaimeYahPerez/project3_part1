@@ -1,4 +1,4 @@
-[## Project 3 - part 2
+[## Project 3 - final
 ## Student Information
 Name: Jaime Yah-Perez 
 Student ID: 008856387
@@ -60,6 +60,9 @@ The public functions were based on previous experience working with the TreeNode
 isSorted() is also based on work done with vectors previously
 
 higherPriority() is based on what was given in the main project page
+
+# Final Part
+The Huffman Tree implementation is primarily based off of the 
 
 ## Implementation Details
 Several helper functions were made for the sake of identifying only the necessary ASCII letters for tokenization

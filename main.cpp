@@ -9,6 +9,7 @@
 #include "utils.hpp"
 #include "BinSearchTree.hpp"
 #include "PriorityQueue.h"
+#include "HuffmanTree.h"
 
 int main(int argc, char *argv[]) {
 
@@ -25,36 +26,38 @@ int main(int argc, char *argv[]) {
     }
 
     const std::string inputFileName = inputPath.string();
-    const std::string dirName = std::string("input_output");
-    const std::string inputFileBaseName = baseNameWithoutTxt(inputFileName);
+    const std::string dirName = inputPath.parent_path().string();
+    const std::string inputFileBaseName = baseNameWithoutTxt(inputPath.filename().string());
 
     // build the path to the .tokens output file.
-    const std::string wordTokensFileName = dirName + "/" + inputFileBaseName + ".tokens";
-
+    const std::string tokensPath = (inputPath.parent_path() / (inputFileBaseName + ".tokens")).string();
+    const std::string freqPath   = (inputPath.parent_path() / (inputFileBaseName + ".freq")).string();
+    const std::string hdrPath    = (inputPath.parent_path() / (inputFileBaseName + ".hdr")).string();
+    const std::string codePath   = (inputPath.parent_path() / (inputFileBaseName + ".code")).string();
 
     // The next several if-statement make sure that the input file, the directory exist
     // and that the output file is writeable.
-     if( error_type status; (status = regularFileExistsAndIsAvailable(inputFileName)) != NO_ERROR )
-        exitOnError(status, inputFileName);
-
-
-    if (error_type status; (status = directoryExists(dirName)) != NO_ERROR )
-        exitOnError(status, dirName);
-
-    if (error_type status; (status = canOpenForWriting(wordTokensFileName)) != NO_ERROR)
-        exitOnError(status, wordTokensFileName);
+    if (error_type st; (st = regularFileExistsAndIsAvailable(inputFileName)) != NO_ERROR)
+        exitOnError(st, inputFileName);
+    if (error_type st; (st = directoryExists(dirName)) != NO_ERROR)
+        exitOnError(st, dirName);
+    if (error_type st; (st = canOpenForWriting(tokensPath)) != NO_ERROR)
+        exitOnError(st, tokensPath);
+    if (error_type st; (st = canOpenForWriting(freqPath)) != NO_ERROR)
+        exitOnError(st, freqPath);
+    if (error_type st; (st = canOpenForWriting(hdrPath)) != NO_ERROR)
+        exitOnError(st, hdrPath);
+    if (error_type st; (st = canOpenForWriting(codePath)) != NO_ERROR)
+        exitOnError(st, codePath);
 
 
     std::vector<std::string> words;
-    namespace fs = std::filesystem;
-    fs::path tokensFilePath(wordTokensFileName); // create a file system path using the output file.
+    Scanner scanner(inputPath);
+    if (error_type st; (st = scanner.tokenize(words)) != NO_ERROR)
+        exitOnError(st, inputFileName);
 
-    auto fileToWords = Scanner(tokensFilePath);
-    if( error_type status; (status = fileToWords.tokenize(words)) != NO_ERROR)
-	    exitOnError(status, inputFileName);
-
-    if (error_type status; (status = writeVectorToFile(wordTokensFileName, words)) != NO_ERROR)
-        exitOnError(status, wordTokensFileName);
+    if (error_type st; (st = writeVectorToFile(tokensPath, words)) != NO_ERROR)
+        exitOnError(st, tokensPath);
 
     //setup for the BST outputs
     BinSearchTree bst;
@@ -63,8 +66,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::pair<std::string,int>> freqLex;
     bst.inorderCollect(freqLex);
 
-    int minf = 0;
-    int maxf = 0;
+    int minf = 0, maxf = 0;
     if (!freqLex.empty()) {
         minf = maxf = freqLex.front().second;
         for (const auto& p : freqLex) {
@@ -89,8 +91,6 @@ int main(int argc, char *argv[]) {
     }
     PriorityQueue pq(std::move(leaves));
 
-    // .freq: write in priority order (freq desc, word asc)
-    const std::string freqPath = dirName + "/" + inputFileBaseName + ".freq";
     std::ofstream out(freqPath, std::ios::out | std::ios::trunc);
     if (!out.is_open()) {
         exitOnError(UNABLE_TO_OPEN_FILE_FOR_WRITING, freqPath);
@@ -106,5 +106,18 @@ int main(int argc, char *argv[]) {
     for (auto it = buf.rbegin(); it != buf.rend(); ++it) {
         out << std::setw(10) << it->second << ' ' << it->first << '\n'; // high -> low (10 spaces, num, string)
     }
+
+    HuffmanTree ht = HuffmanTree::buildFromCounts(freqLex);
+
+    std::ofstream hdr(hdrPath, std::ios::out | std::ios::trunc);
+    if (!hdr.is_open()) exitOnError(UNABLE_TO_OPEN_FILE_FOR_WRITING, hdrPath);
+    if (auto st = ht.writeHeader(hdr); st != NO_ERROR)
+        exitOnError(st, hdrPath);
+
+    std::ofstream code(codePath, std::ios::out | std::ios::trunc);
+    if (!code.is_open()) exitOnError(UNABLE_TO_OPEN_FILE_FOR_WRITING, codePath);
+    if (auto st = ht.encode(words, code, 80); st != NO_ERROR)
+        exitOnError(st, codePath);
+
     return 0;
 }

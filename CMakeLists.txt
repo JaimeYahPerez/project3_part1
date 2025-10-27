@@ -11,4 +11,6 @@ add_executable(p3_part1 main.cpp
         PriorityQueue.h
         BinSearchTree.cpp
         PriorityQueue.cpp
+        HuffmanTree.h
+        HuffmanTree.cpp
 )
