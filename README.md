@@ -62,7 +62,42 @@ isSorted() is also based on work done with vectors previously
 higherPriority() is based on what was given in the main project page
 
 # Final Part
-The Huffman Tree implementation is primarily based off of the 
+The Huffman Tree implementation is primarily based off of the given sketch in the main project page. And some parts of 
+the function implementations is based off of what was done previously.
+Further info was gotten off of our previous lab involving huffman trees, and our lecture covering this part of the
+project.
+
+Certain deviations are made from the project outline this time around. Though these are minor with the intention of 
+maintaining better functionality
+
+This can be seen with the encode function's implementation, and now further parts of main().
+
+Debugging was done with use of compiler errors from blue, code analysis from Clion, and chatgpt analysis. 
+
+*Huffman Tree*
+BuildFromCounts() works off of the outline we were given from the project page, and the info we were given in lecture.
+
+The destructor and destroy() were based off of part 2 and the BinSearchTree destructor
+
+assignCodes() is based off of previous work in part 2 
+
+writeHeader() is based off of previous work from part 2 and part 1. Combining both now to account for errors
+
+encode() works off of the outline we were given in the main project page, but does deviate partially from it. Such as 
+the use of a vector<pair> instead of a map, and the call to assignCodes() instead of VisitLeavesWithCodes 
+(which is not in the provided sketch). This was due to a desire to simplify the initial collection of codes as 
+assignCodes() taking an input of vector<&pair>, therefore I felt a similar data structure would be better
+The rest of it is based on what we were given, and some syntax was used from research into the ostream library, such as
+with .put() and .good()
+
+assignCodesDFS() utilizes logic from our previous work with recursion
+
+writeHeaderPreorder() functions similarly to assignCodesDFS()
+
+*main*
+main() had further restructuring done to it, this time to accomodate the needed paths for the output files. This 
+suggestion came from chatgpt to help keep the flow of main readable and smooth. The huffman tree related additions were 
+added at the end 
 
 ## Implementation Details
 Several helper functions were made for the sake of identifying only the necessary ASCII letters for tokenization
@@ -198,6 +233,47 @@ accessible. Lastly, a buffer vector is made called buf of vector<string, int> to
 a for loop is then ran which writes data in buf into the output frequency file, while also adding 10 spaces first to 
 satisfy the test scripts
 
+# part 3
+*Huffman Tree*
+buildFromCounts() Due to the importance of the class actually owning the tree, it is made to initialize a vector of nodes
+and to run a for loop converting elements from the counts vector into leaf tree nodes for our tree. also stored in a 
+vector of nodes. This vector is then used to create a priorityqueue, which is checked for 2 edge cases. if there are no 
+elements in the priority queue, then the current huffman tree has its' root pointer set to null and returns. If one 
+element is present then it and it alone is extracted from the priority queue and is set as the root pointer of the tree
+and returned. For queue's with more than 2 elements, they are sent into a while loop where 2 mins are extracted, and are
+used to construct the parent based on the combined values of the 2 mins. After, the key of the parent is chosen based on 
+whichever is the smaller word. the two mins are then attached to the left and right subtree and the node is then inserted
+into the priority queue. After completion of the new priority queue, the min is set as the root of the huffman tree and 
+is returned.
+
+The destructor makes a call to the destroy helper function which then handles deletion of the tree. Afterwards, it 
+cleans up by setting the root to null
+
+assignCodes() clears the output vector for safety, declears a prefix string variable, and makes a call to assignCodesDFS
+
+writeHeader() does a preflight check to make sure the passed ostream is usable for writing. It then makes a call to 
+writeHeaderPreorder, with an additional check to the ostream current state to see if the file failed to write, and then
+finally returning no_error if all was successful
+
+encode() first checks to see if the passed ostream is usable. afterwhich a vector of string pairs is declared and will 
+receive codes from the assignCodes function call. then a range for loop is made spanning the tokens vector, and a string
+pointer called bits is declared as null at the start. A second range for loop is declared to span the range of available 
+codes. if the current token is found, then its' code is recorded into bits and the second loop is broken. If no token is 
+found then a short circuit is triggered and an error returned. Another range for loop is then entered spanning bits, and
+every char of bits if inserted into our provided os_bits. If nothing is entered a short circuit error is triggered. Then 
+for char in bits, a col counter is incremented and if it reaches 80, a new line is insrted into os_bits and the counter 
+is set back to 0. os_bits during this time outputs to the console as it is an ostream. Should the main for loop end with 
+col not being 0, a new line is inserted with another check for another succesful ostream occcurring. If no issues occur 
+then no_error is returned
+
+destroy() utilizes recursion and a post order search to delete nodes
+
+assignCodesDFS() utilizes depth first search to construct the prefix with 0 and 1 being pushed back depending on the 
+branch traversal. If both branches lead to a nullptr, then a code is assigned based on the current prefix, or 0 if the 
+tree node leads to a single word tree.
+
+writeHeaderPreorder() functions similarly to assignCodesDFS, only that the if check outputs whatever the prefix has 
+recorded
 
 ## Testing & status
 Testing on blue has proved successful with the provided scripts, apart from the provided TheBells.txt which shows no differences
@@ -208,4 +284,5 @@ files.
 Significant testing was done to ensure that the current implementation works well with the given bash scripts.
 Currently the last test ran on blue gave back 22 matches with the current implementation, and no errors
 
-
+# part 3
+Testing on blue has proven successful and all tests resulted in matches for a total of 44.

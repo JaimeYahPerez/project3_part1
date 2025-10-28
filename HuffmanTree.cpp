@@ -1,11 +1,9 @@
 #include "HuffmanTree.h"
 
-
 HuffmanTree HuffmanTree::buildFromCounts(const std::vector<std::pair<std::string, int>> &counts) {
     HuffmanTree ht;
 
     std::vector<TreeNode*> nodes;
-    nodes.reserve(counts.size());
     for (const auto& [w, c] : counts) {
         auto* leaf = new TreeNode(c);
         leaf->setKey(w);
@@ -14,7 +12,7 @@ HuffmanTree HuffmanTree::buildFromCounts(const std::vector<std::pair<std::string
 
     PriorityQueue pq(std::move(nodes));
 
-    // Edge case: 0 or 1 leaves
+    // Edge cases: 0 or 1 leaves
     if (pq.size() == 0) {
         ht.root_ = nullptr;
         return ht;
@@ -70,6 +68,8 @@ error_type HuffmanTree::encode(const std::vector<std::string> &tokens, std::ostr
         return UNABLE_TO_OPEN_FILE_FOR_WRITING;
     }
 
+
+    //Vector instead of a map to simplify work key, code
     std::vector<std::pair<std::string,std::string>> codes;
     assignCodes(codes);
 
@@ -78,7 +78,8 @@ error_type HuffmanTree::encode(const std::vector<std::string> &tokens, std::ostr
         const std::string* bits = nullptr;
         for (const auto& kv : codes) {
             if (kv.first == w) {
-                bits = &kv.second; break;
+                bits = &kv.second;
+                break;
             }
         }
         if (!bits){

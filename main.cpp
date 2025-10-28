@@ -12,7 +12,6 @@
 #include "HuffmanTree.h"
 
 int main(int argc, char *argv[]) {
-
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " <filename>\n";
         return 1;
@@ -24,7 +23,7 @@ int main(int argc, char *argv[]) {
     if (inputPath.parent_path().empty()) {
         inputPath = std::filesystem::path("input_output") / inputPath.filename();
     }
-
+    //input file declarations
     const std::string inputFileName = inputPath.string();
     const std::string dirName = inputPath.parent_path().string();
     const std::string inputFileBaseName = baseNameWithoutTxt(inputPath.filename().string());
@@ -50,7 +49,7 @@ int main(int argc, char *argv[]) {
     if (error_type st; (st = canOpenForWriting(codePath)) != NO_ERROR)
         exitOnError(st, codePath);
 
-
+    //scanner calls
     std::vector<std::string> words;
     Scanner scanner(inputPath);
     if (error_type st; (st = scanner.tokenize(words)) != NO_ERROR)
@@ -91,33 +90,43 @@ int main(int argc, char *argv[]) {
     }
     PriorityQueue pq(std::move(leaves));
 
-    std::ofstream out(freqPath, std::ios::out | std::ios::trunc);
+    std::ofstream out(freqPath);
     if (!out.is_open()) {
         exitOnError(UNABLE_TO_OPEN_FILE_FOR_WRITING, freqPath);
     }
 
-    std::vector<std::pair<std::string,int>> buf;
-    buf.reserve(pq.size());
+    //buffer to hold output from Priorityqueue run
+    std::vector<std::pair<std::string,int>> buff;
+    buff.reserve(pq.size());
     while (!pq.empty()) {
-        TreeNode* m = pq.extractMin();
-        buf.emplace_back(m->key(), m->value());
-        delete m;
+        TreeNode* temp = pq.extractMin();
+        buff.emplace_back(temp->key(), temp->value());
+        delete temp;
     }
-    for (auto it = buf.rbegin(); it != buf.rend(); ++it) {
-        out << std::setw(10) << it->second << ' ' << it->first << '\n'; // high -> low (10 spaces, num, string)
+    for (auto it = buff.rbegin(); it != buff.rend(); ++it) {
+        out << std::setw(10) << it->second << ' ' << it->first << '\n';
     }
 
+    //Huffman Tree declarations
     HuffmanTree ht = HuffmanTree::buildFromCounts(freqLex);
 
-    std::ofstream hdr(hdrPath, std::ios::out | std::ios::trunc);
-    if (!hdr.is_open()) exitOnError(UNABLE_TO_OPEN_FILE_FOR_WRITING, hdrPath);
-    if (auto st = ht.writeHeader(hdr); st != NO_ERROR)
+    std::ofstream hdr(hdrPath);
+    if (!hdr.is_open()) {
+        exitOnError(UNABLE_TO_OPEN_FILE_FOR_WRITING, hdrPath);
+    }
+    auto st = ht.writeHeader(hdr);
+    if (st != NO_ERROR) {
         exitOnError(st, hdrPath);
+    }
 
-    std::ofstream code(codePath, std::ios::out | std::ios::trunc);
-    if (!code.is_open()) exitOnError(UNABLE_TO_OPEN_FILE_FOR_WRITING, codePath);
-    if (auto st = ht.encode(words, code, 80); st != NO_ERROR)
+    std::ofstream code(codePath);
+    if (!code.is_open()) {
+        exitOnError(UNABLE_TO_OPEN_FILE_FOR_WRITING, codePath);
+    }
+    st = ht.encode(words, code, 80);
+    if (st != NO_ERROR) {
         exitOnError(st, codePath);
+    }
 
     return 0;
 }

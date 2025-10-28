@@ -1,10 +1,12 @@
 #pragma once
 #ifndef IMPLEMENTATION_HUFFMANTREE_H
 #define IMPLEMENTATION_HUFFMANTREE_H
+
+#include <vector>
 #include "TreeNode.hpp"
 #include "utils.hpp"
 #include "PriorityQueue.h"
-#include <vector>
+
 class HuffmanTree {
 public:
     // Build from BST output (lexicographic vector of (word, count)).
